@@ -4,7 +4,7 @@
 #include <ctype.h>
 
 /* --------------------------------------------------------------- */
-/* ESTRUTURA DE MÚSICA */
+/* ESTRUTURA DE MUSICA */
 typedef struct {
     char nome[60];
     char artista[40];
@@ -37,16 +37,16 @@ void cadastrar(FILE *arq) {
     Musica M;
     char confirma;
 
-    printf("\n=== CADASTRAR MÚSICA ===\n");
-    printf("Registro número: %d\n", tamanho(arq) + 1);
+    printf("\n=== CADASTRAR MUSICA ===\n");
+    printf("Registro numero: %d\n", tamanho(arq) + 1);
 
-    printf("Nome da música: ");
+    printf("Nome da musica: ");
     ler_string(M.nome, sizeof(M.nome));
 
     printf("Artista: ");
     ler_string(M.artista, sizeof(M.artista));
 
-    printf("Gênero musical: ");
+    printf("Genero musical: ");
     ler_string(M.genero, sizeof(M.genero));
 
     printf("Confirmar (s/n)? ");
@@ -57,7 +57,7 @@ void cadastrar(FILE *arq) {
         fseek(arq, 0, SEEK_END);
         fwrite(&M, sizeof(Musica), 1, arq);
         fflush(arq);
-        printf("Música cadastrada!\n");
+        printf("Musica cadastrada!\n");
     } else {
         printf("Cancelado.\n");
     }
@@ -68,13 +68,13 @@ void consultar(FILE *arq) {
     int nr;
     Musica M;
 
-    printf("\nCódigo da música: ");
+    printf("\nCodigo da musica: ");
     if (scanf("%d", &nr) != 1) { limpa_buffer(); return; }
     limpa_buffer();
 
     int total = tamanho(arq);
     if (nr <= 0 || nr > total) {
-        printf("Código inválido.\n");
+        printf("Codigo invalido.\n");
         return;
     }
 
@@ -82,10 +82,10 @@ void consultar(FILE *arq) {
     fseek(arq, pos, SEEK_SET);
     fread(&M, sizeof(Musica), 1, arq);
 
-    printf("\n=== MÚSICA %d ===\n", nr);
+    printf("\n=== MUSICA %d ===\n", nr);
     printf("Nome:    %s\n", M.nome);
     printf("Artista: %s\n", M.artista);
-    printf("Gênero:  %s\n", M.genero);
+    printf("Genero:  %s\n", M.genero);
 }
 
 /* --------------------------------------------------------------- */
@@ -94,19 +94,19 @@ void excluir(FILE *arq) {
     int nr, total, i;
     Musica M;
 
-    printf("\nCódigo da música a excluir: ");
+    printf("\nCodigo da musica a excluir: ");
     if (scanf("%d", &nr) != 1) { limpa_buffer(); return; }
     limpa_buffer();
 
     total = tamanho(arq);
     if (nr <= 0 || nr > total) {
-        printf("Código inválido.\n");
+        printf("Codigo invalido.\n");
         return;
     }
 
     FILE *tmp = fopen("C:\\ling_c\\TEMP.dat", "w+b");
     if (!tmp) {
-        printf("Erro ao criar arquivo temporário.\n");
+        printf("Erro ao criar arquivo temporario.\n");
         return;
     }
 
@@ -127,7 +127,7 @@ void excluir(FILE *arq) {
 
     arq = fopen("C:\\ling_c\\Musicas.dat", "r+b");
 
-    printf("Registro excluído com sucesso!\n");
+    printf("Registro excluido com sucesso!\n");
 }
 
 /* --------------------------------------------------------------- */
@@ -141,7 +141,7 @@ void gerar_arquivo_texto(FILE *arq) {
         return;
     }
 
-    fprintf(txt, "RELATÓRIO DE MÚSICAS\n\n");
+    fprintf(txt, "RELATORIO DE MUSICAS\n\n");
     fprintf(txt, "COD  %-30s %-20s %-15s\n",
             "NOME", "ARTISTA", "GENERO");
     fprintf(txt, "--------------------------------------------------------------------------\n");
@@ -169,15 +169,15 @@ int main(void) {
 
     int op;
     do {
-        printf("\n========= SISTEMA DE MÚSICAS =========\n");
-        printf("1. Cadastrar música\n");
-        printf("2. Consultar música\n");
+        printf("\n========= SISTEMA DE MUSICAS =========\n");
+        printf("1. Cadastrar musica\n");
+        printf("2. Consultar musica\n");
         printf("3. Gerar arquivo texto\n");
         printf("4. Excluir registro\n");
         printf("5. Sair\n");
         printf("--------------------------------------\n");
-        printf("Total de músicas: %d\n", tamanho(arq));
-        printf("Opção: ");
+        printf("Total de musicas: %d\n", tamanho(arq));
+        printf("Opcao: ");
 
         if (scanf("%d", &op) != 1) { limpa_buffer(); continue; }
         limpa_buffer();
@@ -188,7 +188,7 @@ int main(void) {
             case 3: gerar_arquivo_texto(arq); break;
             case 4: excluir(arq); break;
             case 5: printf("Saindo...\n"); break;
-            default: printf("Opção inválida!\n");
+            default: printf("Opcao invalida!\n");
         }
     } while (op != 5);
 

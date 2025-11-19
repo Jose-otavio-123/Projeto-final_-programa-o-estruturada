@@ -2,13 +2,13 @@
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
+#include <locale.h>
 
-/* --------------------------------------------------------------- */
-/* ESTRUTURA DE MUSICA */
 typedef struct {
     char nome[60];
     char artista[40];
     char genero[20];
+    char status;
 } Musica;
 
 /* --------------------------------------------------------------- */
@@ -35,6 +35,7 @@ int tamanho(FILE *arq) {
 /* --------------------------------------------------------------- */
 void cadastrar(FILE *arq) {
     Musica M;
+    M.status = ' ';
     char confirma;
 
     printf("\n=== CADASTRAR MUSICA ===\n");
@@ -83,51 +84,11 @@ void consultar(FILE *arq) {
     fread(&M, sizeof(Musica), 1, arq);
 
     printf("\n=== MUSICA %d ===\n", nr);
+    if (M.status == '*') printf("STATUS: EXCLUIDA\n");
+
     printf("Nome:    %s\n", M.nome);
     printf("Artista: %s\n", M.artista);
     printf("Genero:  %s\n", M.genero);
-}
-
-/* --------------------------------------------------------------- */
-/* EXCLUI FISICAMENTE DO ARQUIVO */
-void excluir(FILE *arq) {
-    int nr, total, i;
-    Musica M;
-
-    printf("\nCodigo da musica a excluir: ");
-    if (scanf("%d", &nr) != 1) { limpa_buffer(); return; }
-    limpa_buffer();
-
-    total = tamanho(arq);
-    if (nr <= 0 || nr > total) {
-        printf("Codigo invalido.\n");
-        return;
-    }
-
-    FILE *tmp = fopen("C:\\ling_c\\TEMP.dat", "w+b");
-    if (!tmp) {
-        printf("Erro ao criar arquivo temporario.\n");
-        return;
-    }
-
-    fseek(arq, 0, SEEK_SET);
-
-    for (i = 0; i < total; i++) {
-        fread(&M, sizeof(Musica), 1, arq);
-        if (i != (nr - 1)) {
-            fwrite(&M, sizeof(Musica), 1, tmp);
-        }
-    }
-
-    fclose(arq);
-    fclose(tmp);
-
-    remove("C:\\ling_c\\Musicas.dat");
-    rename("C:\\ling_c\\TEMP.dat", "C:\\ling_c\\Musicas.dat");
-
-    arq = fopen("C:\\ling_c\\Musicas.dat", "r+b");
-
-    printf("Registro excluido com sucesso!\n");
 }
 
 /* --------------------------------------------------------------- */
@@ -135,6 +96,7 @@ void gerar_arquivo_texto(FILE *arq) {
     FILE *txt = fopen("C:\\ling_c\\Musicas.txt", "w");
     Musica M;
     int i, total = tamanho(arq);
+    char status_str[12];
 
     if (!txt) {
         printf("Erro ao criar arquivo texto.\n");
@@ -142,7 +104,7 @@ void gerar_arquivo_texto(FILE *arq) {
     }
 
     fprintf(txt, "RELATORIO DE MUSICAS\n\n");
-    fprintf(txt, "COD  %-30s %-20s %-15s\n",
+    fprintf(txt, "COD  %-30s %-20s %-15s STATUS\n",
             "NOME", "ARTISTA", "GENERO");
     fprintf(txt, "--------------------------------------------------------------------------\n");
 
@@ -150,12 +112,55 @@ void gerar_arquivo_texto(FILE *arq) {
         fseek(arq, i * sizeof(Musica), SEEK_SET);
         fread(&M, sizeof(Musica), 1, arq);
 
-        fprintf(txt, "%03d %-30s %-20s %-15s\n",
-                i + 1, M.nome, M.artista, M.genero);
+        if (M.status == '*') strcpy(status_str, "EXCLUIDA");
+        else strcpy(status_str, "ATIVA");
+
+        fprintf(txt, "%03d %-30s %-20s %-15s %s\n",
+                i + 1, M.nome, M.artista, M.genero, status_str);
     }
 
     fclose(txt);
     printf("Arquivo texto gerado com sucesso!\n");
+}
+
+/* --------------------------------------------------------------- */
+void excluir(FILE *arq) {
+    int nr;
+    char confirma;
+    Musica M;
+
+    printf("\nCodigo da musica a excluir: ");
+    if (scanf("%d", &nr) != 1) { limpa_buffer(); return; }
+    limpa_buffer();
+
+    int total = tamanho(arq);
+    if (nr <= 0 || nr > total) {
+        printf("Codigo invalido.\n");
+        return;
+    }
+
+    long pos = (long)(nr - 1) * sizeof(Musica);
+    fseek(arq, pos, SEEK_SET);
+    fread(&M, sizeof(Musica), 1, arq);
+
+    if (M.status == '*') {
+        printf("Registro ja excluido.\n");
+        return;
+    }
+
+    printf("Confirmar exclusao (s/n)? ");
+    if (scanf("%c", &confirma) != 1) { limpa_buffer(); return; }
+    limpa_buffer();
+
+    if (toupper(confirma) == 'S') {
+        M.status = '*';
+        fseek(arq, pos, SEEK_SET);
+        fwrite(&M, sizeof(Musica), 1, arq);
+        fflush(arq);
+        printf("Excluida!\n");
+    } else {
+        printf("Cancelado.\n");
+    }
 }
 
 /* --------------------------------------------------------------- */
